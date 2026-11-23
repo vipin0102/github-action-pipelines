@@ -8,14 +8,14 @@ on:
 # Jobs
 jobs:
     build:
-     runs-on: ubuntu:latest
+     runs-on: ubuntu-latest
      steps:
         - name: Building Image
           run: echo "Bulding Images"
           
     test:
      needs: [build]   
-     runs-on: ubuntu:latest
+     runs-on: ubuntu-latest
      steps:
         - name: Test Image
           run: echo "Testing The Images"
