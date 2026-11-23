@@ -1,0 +1,28 @@
+# Workflows
+name: CI
+
+on:
+    push:
+        branches: [main]
+
+# Jobs
+jobs:
+    build:
+     runs-on: ubuntu:latest
+     steps:
+        - name: Building Image
+          run: echo "Bulding Images"
+          
+    test:
+     needs: [build]   
+     runs-on: ubuntu:latest
+     steps:
+        - name: Test Image
+          run: echo "Testing The Images"
+          
+    Deploy:
+     needs: [build, test]   
+     runs-on: ubuntu-latest
+     steps:
+        - name: Deploy Images
+          run: echo "Deploying image"           
