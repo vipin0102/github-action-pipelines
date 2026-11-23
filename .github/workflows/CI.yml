@@ -11,8 +11,8 @@ jobs:
      runs-on: ubuntu-latest
      steps:
         - name: Clone the repo
-          uses: action/checkout@v7
-          
+          uses: actions/checkout@v7
+
         - name: Building Image
           run: echo "Bulding Images"
           
