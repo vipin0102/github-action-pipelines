@@ -1,0 +1,41 @@
+name: CI
+
+on:
+    workflow_dispatch:
+
+jobs:
+    Build: 
+      runs-on: self-hosted
+#      strategy:
+#        matrix:
+#            build: [frontend, backend]
+      steps:
+         - name: Clone Repository
+           uses: actions/checkout@v7
+          
+         - name: Docker Login  
+           uses: docker/login-action@v4
+           with:
+              username: ${{ vars.DOCKERHUB_USERNAME }}
+              password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+         - name: Docker Image Build
+           run: docker build --no-cache -t ${{ vars.DOCKERHUB_USERNAME }}/ci:latest .
+          
+         - name: Docker Images Push
+           run: docker push ${{ vars.DOCKERHUB_USERNAME }}/ci:latest
+
+         - name: Run Trivy vulnerability scanner
+           uses: aquasecurity/trivy-action@v0.36.0
+           with:
+              image-ref: '${{ vars.DOCKERHUB_USERNAME }}/ci:latest'
+              format: 'sarif'
+              output: 'trivy-results.sarif'
+              severity: 'CRITICAL,HIGH'
+              exit-code: '1'
+         - name: Upload Trivy scan results
+           if: always()
+           uses: github/codeql-action/upload-sarif@v4
+           with:
+              sarif_file: 'trivy-results.sarif'              
+           
