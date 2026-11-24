@@ -27,7 +27,7 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - name: Docker Login
-              run: docker/login-action@v4
+              uses: docker/login-action@v4
               
             - name: Docker Pull Image
               run: docker pull ${{ vars.DOCKERHUB_USERNAME }}/nginx:latest
