@@ -1,10 +1,11 @@
+# This is used for testin purpose only
 name: CI
 
 on:
     workflow_dispatch:
 
 jobs:
-    Build: 
+    Build-and-Push: 
       runs-on: self-hosted
 #      strategy:
 #        matrix:
@@ -20,11 +21,16 @@ jobs:
               password: ${{ secrets.DOCKERHUB_TOKEN }}
 
          - name: Docker Image Build
-           run: docker build --no-cache -t ${{ vars.DOCKERHUB_USERNAME }}/ci:latest .
-          
-         - name: Docker Images Push
-           run: docker push ${{ vars.DOCKERHUB_USERNAME }}/ci:latest
+           uses: docker/build-push-action@v7
+           with:
+              context: .
+              push: true
+              tags: ${{ vars.DOCKERHUB_USERNAME }}/ci:latest
 
+    Trivy-scan:
+      needs: [Build-and-Push]  
+      runs-on: self-hosted
+      steps:       
          - name: Run Trivy vulnerability scanner
            uses: aquasecurity/trivy-action@v0.36.0
            with:
@@ -37,5 +43,12 @@ jobs:
            if: always()
            uses: github/codeql-action/upload-sarif@v4
            with:
-              sarif_file: 'trivy-results.sarif'              
+              sarif_file: 'trivy-results.sarif' 
+    
+    Deploy:
+        needs: [Build-and-Push, Trivy-scan]
+        uses: ./.github/workflows/CD-Dev.yml
+        with:
+            secrets: inherit
+
            
