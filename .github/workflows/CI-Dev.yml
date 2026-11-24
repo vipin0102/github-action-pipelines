@@ -48,7 +48,6 @@ jobs:
     Deploy:
         needs: [Build-and-Push, Trivy-scan]
         uses: ./.github/workflows/CD-Dev.yml
-        with:
-            secrets: inherit
+        secrets: inherit
 
            
