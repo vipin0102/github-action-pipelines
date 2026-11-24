@@ -1,0 +1,39 @@
+name: Deployment
+
+on:
+    workflow-dipatch:
+
+jobs:
+    build-push:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout repo
+              uses: actions/checkout@v7
+
+            - name: Docker Login  
+              uses: docker/login-action@v4
+              with:
+                 username: ${{ vars.DOCKERHUB_USERNAME }}
+                 password: ${{ secrets.DOCKERHUB_TOKEN }}
+            
+            - name: Docker Build 
+              run: docker build --no-cache -t ${{ vars.DOCKERHUB_USERNAME }}/nginx:latest .
+            
+            - name: Docker push
+              run: docker push  ${{ vars.DOCKERHUB_USERNAME }}/nginx:latest
+
+    Deploy:
+        needs: [build-push]
+        runs-on: ubuntu-latest
+        steps:
+            - name: Docker Login
+              run: docker/login-action@v4
+              
+            - name: Docker Pull Image
+              run: docker pull ${{ vars.DOCKERHUB_USERNAME }}/nginx:latest
+              
+            - name: Deploying Image
+              run: docker run --name ui1 -itd -p 9999:80 ${{ vars.DOCKERHUB_USERNAME }}/nginx:latest  
+              
+                 
+
